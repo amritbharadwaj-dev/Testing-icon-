@@ -1,5 +1,5 @@
-const CACHE = 'amrit-v2';
-const FILES = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png'];
+const CACHE = 'qr-gen-v1';
+const FILES = ['./', './index.html', './manifest.json', './icon-192-1.png', './icon-512-1.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(FILES); }));
@@ -17,6 +17,8 @@ self.addEventListener('activate', function (e) {
 
 self.addEventListener('fetch', function (e) {
   e.respondWith(
-    fetch(e.request).catch(function () { return caches.match(e.request); })
+    caches.match(e.request).then(function(cachedResponse) {
+      return cachedResponse || fetch(e.request);
+    }).catch(function () { return caches.match('./index.html'); })
   );
 });
