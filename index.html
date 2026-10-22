@@ -2,178 +2,259 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>QR Generator Pro</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
+  <title>QR Studio Pro</title>
   <meta name="theme-color" content="#ffffff">
   <link rel="manifest" href="manifest.json">
   <link rel="icon" type="image/png" href="favicon.png">
   <link rel="apple-touch-icon" href="apple-touch-icon.png">
+  
+  <!-- Tailwind for modern styling -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Premium Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Advanced QR Code Library for Adobe-like capabilities -->
+  <script type="text/javascript" src="https://unpkg.com/qr-code-styling@1.5.0/lib/qr-code-styling.js"></script>
+  
   <style>
     body { 
-      font-family: 'Inter', sans-serif; 
-      background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-      min-height: 100vh;
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #f8fafc; 
     }
-    .fade-in { animation: fadeIn 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
-    @keyframes fadeIn { 
-      from { opacity: 0; transform: scale(0.95) translateY(10px); } 
-      to { opacity: 1; transform: scale(1) translateY(0); } 
+    /* Custom Webkit scrollbar for clean UI */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+    
+    /* Adobe-like color picker styling */
+    input[type="color"] {
+        -webkit-appearance: none;
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        cursor: pointer;
+        padding: 0;
+        overflow: hidden;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
-    .focus-ring { box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.15); }
+    input[type="color"]::-webkit-color-swatch-wrapper { padding: 0; }
+    input[type="color"]::-webkit-color-swatch { border: none; border-radius: 50%; }
+
+    /* Safe area for mobile download button */
+    .pb-safe { padding-bottom: env(safe-area-inset-bottom, 20px); }
   </style>
 </head>
-<body class="flex flex-col items-center justify-center p-4 sm:p-8">
-  <main class="w-full max-w-3xl bg-white/90 backdrop-blur-xl rounded-[2rem] shadow-2xl overflow-hidden p-6 sm:p-12 transition-all border border-gray-100">
-    <div class="text-center mb-10">
-      <div class="inline-flex items-center justify-center p-3 bg-blue-50 rounded-2xl mb-4">
-        <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
-        </svg>
+<body class="text-slate-800 antialiased min-h-screen flex flex-col pb-24 md:pb-0">
+
+  <!-- Top Navigation -->
+  <nav class="bg-white border-b border-slate-200 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 bg-gradient-to-tr from-indigo-600 to-violet-600 rounded-xl flex items-center justify-center shadow-lg shadow-indigo-500/30">
+        <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm14 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path></svg>
       </div>
-      <h1 class="text-4xl sm:text-5xl font-extrabold text-gray-900 tracking-tight mb-3">QR Generator</h1>
-      <p class="text-lg sm:text-xl text-gray-500 font-medium">Type your link below. Watch the magic happen.</p>
+      <span class="font-extrabold text-2xl tracking-tight bg-clip-text text-transparent bg-gradient-to-r from-slate-900 to-slate-700">QR Studio</span>
     </div>
+  </nav>
+
+  <main class="flex-1 max-w-7xl w-full mx-auto p-4 md:p-8 flex flex-col md:flex-row gap-6 md:gap-10">
     
-    <div class="relative mb-12 group">
-      <input 
-        type="text" 
-        id="qr-input" 
-        placeholder="https://example.com" 
-        class="w-full text-2xl sm:text-3xl p-6 sm:p-8 bg-gray-50 border-2 border-transparent rounded-3xl focus:outline-none focus:border-blue-500 focus:bg-white focus-ring transition-all placeholder-gray-400 text-gray-800 shadow-inner block"
-        autocomplete="off"
-        spellcheck="false"
-      >
-      <div class="absolute right-6 top-1/2 -translate-y-1/2 text-gray-300 group-focus-within:text-blue-500 transition-colors">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1"></path></svg>
+    <!-- Controls Section -->
+    <div class="flex-1 space-y-6 max-w-3xl">
+      
+      <!-- Input Area -->
+      <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200">
+        <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Target URL or Text</label>
+        <div class="relative">
+          <input type="text" id="qr-input" placeholder="https://your-website.com" class="w-full pl-5 pr-12 py-5 bg-slate-50 border-2 border-slate-100 rounded-2xl focus:ring-0 focus:border-indigo-500 outline-none transition-all text-xl font-medium text-slate-800" value="https://example.com" autocomplete="off">
+        </div>
+        <p class="text-sm font-medium text-slate-400 mt-3 flex items-center gap-2">
+          <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+          QR code updates in real-time
+        </p>
       </div>
+
+      <!-- Customization Area -->
+      <div class="bg-white p-6 md:p-8 rounded-[2rem] shadow-sm border border-slate-200 space-y-8">
+        <h3 class="font-extrabold text-xl text-slate-800 border-b border-slate-100 pb-4">Design & Styling</h3>
+        
+        <!-- Pattern Style -->
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Pattern Style</label>
+          <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <button class="style-btn active border-2 border-indigo-600 bg-indigo-50 text-indigo-700 py-3 rounded-2xl text-sm font-bold transition-all" data-style="square">Square</button>
+            <button class="style-btn border-2 border-slate-100 hover:border-indigo-300 py-3 rounded-2xl text-sm font-bold text-slate-600 transition-all" data-style="dots">Dots</button>
+            <button class="style-btn border-2 border-slate-100 hover:border-indigo-300 py-3 rounded-2xl text-sm font-bold text-slate-600 transition-all" data-style="rounded">Rounded</button>
+            <button class="style-btn border-2 border-slate-100 hover:border-indigo-300 py-3 rounded-2xl text-sm font-bold text-slate-600 transition-all" data-style="classy">Classy</button>
+          </div>
+        </div>
+
+        <!-- Corners Style -->
+        <div>
+          <label class="block text-sm font-bold text-slate-700 mb-3 uppercase tracking-wider">Corner Eyes</label>
+          <div class="grid grid-cols-3 gap-3">
+            <button class="corner-btn active border-2 border-indigo-600 bg-indigo-50 text-indigo-700 py-3 rounded-2xl text-sm font-bold transition-all" data-style="square">Square</button>
+            <button class="corner-btn border-2 border-slate-100 hover:border-indigo-300 py-3 rounded-2xl text-sm font-bold text-slate-600 transition-all" data-style="dot">Dot</button>
+            <button class="corner-btn border-2 border-slate-100 hover:border-indigo-300 py-3 rounded-2xl text-sm font-bold text-slate-600 transition-all" data-style="extra-rounded">Smooth</button>
+          </div>
+        </div>
+
+        <!-- Colors -->
+        <div class="grid grid-cols-2 gap-6 pt-2">
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <label class="text-sm font-bold text-slate-700">QR Color</label>
+            <input type="color" id="qr-color" value="#111827">
+          </div>
+          <div class="bg-slate-50 p-4 rounded-2xl border border-slate-100 flex items-center justify-between">
+            <label class="text-sm font-bold text-slate-700">Background</label>
+            <input type="color" id="bg-color" value="#ffffff">
+          </div>
+        </div>
+      </div>
+
     </div>
 
-    <div class="flex flex-col justify-center items-center min-h-[340px]">
-      <div id="qr-container" class="hidden fade-in flex flex-col items-center gap-8">
-        <div class="bg-white p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] border border-gray-100 ring-1 ring-black/5">
-          <canvas id="qr-canvas" class="rounded-xl"></canvas>
+    <!-- Preview Section -->
+    <div class="flex-1 flex justify-center md:justify-end">
+      <div class="w-full max-w-sm md:sticky md:top-28 h-fit">
+        <div class="bg-white p-6 md:p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 flex flex-col items-center relative overflow-hidden group">
+          
+          <!-- Subtle decorative bg -->
+          <div class="absolute top-0 w-full h-40 bg-gradient-to-b from-indigo-50 to-transparent"></div>
+
+          <h2 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6 relative z-10 bg-white px-3 py-1 rounded-full shadow-sm border border-slate-100">Live Preview</h2>
+          
+          <!-- Canvas Container -->
+          <div class="bg-white p-3 rounded-3xl shadow-md border border-slate-100 mb-8 relative z-10 transition-transform duration-300 group-hover:scale-[1.02]">
+            <div id="canvas-container" class="rounded-2xl overflow-hidden bg-white"></div>
+          </div>
+
+          <!-- Desktop Download Button -->
+          <button id="download-btn-desktop" class="hidden md:flex w-full py-4 bg-slate-900 hover:bg-black text-white rounded-2xl font-bold text-lg items-center justify-center gap-3 transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1">
+            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+            Download High-Res
+          </button>
         </div>
-        <button id="download-btn" class="px-8 py-4 bg-gray-900 hover:bg-black text-white text-lg sm:text-xl font-semibold rounded-2xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 transition-all flex items-center gap-3 active:scale-95">
-          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
-          Download QR
-        </button>
-      </div>
-      
-      <div id="empty-state" class="text-gray-400 text-center flex flex-col items-center px-4">
-        <div class="w-24 h-24 mb-6 rounded-full bg-gray-50 flex items-center justify-center border-2 border-dashed border-gray-200">
-          <svg class="w-12 h-12 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1V4z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 4a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V4z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M3 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H4a1 1 0 01-1-1v-4z"></path>
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M15 16a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z"></path>
-          </svg>
-        </div>
-        <p class="text-xl sm:text-2xl font-medium text-gray-500">Awaiting input...</p>
-        <p class="text-base sm:text-lg text-gray-400 mt-2 max-w-xs">Start typing a URL or some text in the box above.</p>
       </div>
     </div>
-    
   </main>
 
-  <!-- PWA Install prompt toast -->
-  <div id="pwa-toast" class="hidden fixed bottom-4 right-4 bg-gray-900 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-4 fade-in z-50">
-    <div>
-      <p class="font-semibold text-sm sm:text-base">Install App</p>
-      <p class="text-xs sm:text-sm text-gray-400">Get it on your home screen</p>
-    </div>
-    <button id="pwa-install-btn" class="ml-4 px-4 py-2 bg-blue-600 hover:bg-blue-500 text-sm font-semibold rounded-xl transition-colors">Install</button>
-    <button id="pwa-close-btn" class="text-gray-400 hover:text-white transition-colors p-1">
-      <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+  <!-- Mobile Sticky Bottom Action Bar -->
+  <div class="md:hidden fixed bottom-0 left-0 w-full bg-white/90 backdrop-blur-md border-t border-slate-200 p-4 pb-safe z-50 shadow-[0_-10px_40px_rgba(0,0,0,0.1)]">
+    <button id="download-btn-mobile" class="w-full py-4 bg-slate-900 active:bg-black text-white rounded-2xl font-bold text-xl flex items-center justify-center gap-3 transition-all shadow-xl">
+      <svg class="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path></svg>
+      Download to Phone
     </button>
   </div>
 
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script>
+    // Configuration for High-Resolution Export
+    let config = {
+      width: 1000, // Very high resolution for download (Adobe Quality)
+      height: 1000,
+      data: "https://example.com",
+      margin: 20,
+      qrOptions: { typeNumber: 0, mode: "Byte", errorCorrectionLevel: "H" },
+      imageOptions: { hideBackgroundDots: true, imageSize: 0.4, margin: 10 },
+      dotsOptions: { type: "square", color: "#111827" },
+      backgroundOptions: { color: "#ffffff" },
+      cornersSquareOptions: { type: "square", color: "#111827" },
+      cornersDotOptions: { type: "square", color: "#111827" },
+    };
+
+    // The high-res hidden generator used for downloading
+    const qrCode = new QRCodeStyling(config);
+
+    // The low-res SVG generator used for the crisp live preview
+    const container = document.getElementById("canvas-container");
+    const previewConfig = { ...config, width: 260, height: 260, type: "svg", margin: 0 };
+    const previewQrCode = new QRCodeStyling(previewConfig);
+    previewQrCode.append(container);
+
+    // Elements
     const input = document.getElementById('qr-input');
-    const qrContainer = document.getElementById('qr-container');
-    const qrCanvas = document.getElementById('qr-canvas');
-    const emptyState = document.getElementById('empty-state');
-    const downloadBtn = document.getElementById('download-btn');
-
-    let debounceTimer;
-
-    function generateQR(text) {
-      if (!text.trim()) {
-        qrContainer.classList.add('hidden');
-        emptyState.classList.remove('hidden');
-        return;
-      }
+    const colorInput = document.getElementById('qr-color');
+    const bgInput = document.getElementById('bg-color');
+    
+    function updateQR() {
+      const text = input.value || "https://example.com";
+      const newConfig = {
+        data: text,
+        dotsOptions: { ...config.dotsOptions },
+        cornersSquareOptions: { ...config.cornersSquareOptions, color: config.dotsOptions.color },
+        cornersDotOptions: { ...config.cornersDotOptions, color: config.dotsOptions.color },
+        backgroundOptions: { ...config.backgroundOptions }
+      };
       
-      QRCode.toCanvas(qrCanvas, text, {
-        width: 320,
-        margin: 2,
-        scale: 10,
-        color: {
-          dark: '#111827',
-          light: '#ffffff'
-        }
-      }, function (error) {
-        if (error) console.error(error);
-        emptyState.classList.add('hidden');
-        qrContainer.classList.remove('hidden');
+      // Update both instances seamlessly
+      previewQrCode.update(newConfig);
+      qrCode.update(newConfig);
+    }
+
+    // Dynamic typing update
+    input.addEventListener('input', () => setTimeout(updateQR, 50));
+
+    // Color Pickers
+    colorInput.addEventListener('input', (e) => {
+      config.dotsOptions.color = e.target.value;
+      updateQR();
+    });
+    
+    bgInput.addEventListener('input', (e) => {
+      config.backgroundOptions.color = e.target.value;
+      updateQR();
+    });
+
+    // Style Tabs Switching Logic
+    const styleBtns = document.querySelectorAll('.style-btn');
+    styleBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        styleBtns.forEach(b => {
+          b.classList.remove('active', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+          b.classList.add('border-slate-100', 'text-slate-600');
+        });
+        const target = e.target;
+        target.classList.remove('border-slate-100', 'text-slate-600');
+        target.classList.add('active', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+        
+        config.dotsOptions.type = target.dataset.style;
+        updateQR();
       });
-    }
-
-    input.addEventListener('input', (e) => {
-      clearTimeout(debounceTimer);
-      debounceTimer = setTimeout(() => {
-        generateQR(e.target.value);
-      }, 100); 
     });
 
-    // Auto focus on desktop
-    if(window.innerWidth > 768) {
-      input.focus();
-    }
-
-    downloadBtn.addEventListener('click', () => {
-        const url = qrCanvas.toDataURL("image/png");
-        const link = document.createElement('a');
-        link.download = 'qrcode.png';
-        link.href = url;
-        link.click();
+    const cornerBtns = document.querySelectorAll('.corner-btn');
+    cornerBtns.forEach(btn => {
+      btn.addEventListener('click', (e) => {
+        cornerBtns.forEach(b => {
+          b.classList.remove('active', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+          b.classList.add('border-slate-100', 'text-slate-600');
+        });
+        const target = e.target;
+        target.classList.remove('border-slate-100', 'text-slate-600');
+        target.classList.add('active', 'border-indigo-600', 'bg-indigo-50', 'text-indigo-700');
+        
+        config.cornersSquareOptions.type = target.dataset.style;
+        config.cornersDotOptions.type = target.dataset.style === 'extra-rounded' ? 'dot' : target.dataset.style;
+        updateQR();
+      });
     });
 
-    // Service Worker Registration
+    // Trigger download of real, high-resolution PNG image directly to device
+    const downloadAction = () => {
+      // It downloads the 1000x1000px version
+      qrCode.download({ name: "QR-Studio-Pro", extension: "png" });
+    };
+    
+    document.getElementById('download-btn-desktop').addEventListener('click', downloadAction);
+    document.getElementById('download-btn-mobile').addEventListener('click', downloadAction);
+
+    // Keep PWA setup running
     if ('serviceWorker' in navigator) {
       window.addEventListener('load', function () {
-        navigator.serviceWorker.register('./sw.js').catch(err => console.log('SW setup failed', err));
+        navigator.serviceWorker.register('./sw.js');
       });
     }
-
-    // PWA Install Logic
-    let deferredPrompt;
-    const pwaToast = document.getElementById('pwa-toast');
-    const installBtn = document.getElementById('pwa-install-btn');
-    const closeBtn = document.getElementById('pwa-close-btn');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-      e.preventDefault();
-      deferredPrompt = e;
-      pwaToast.classList.remove('hidden');
-    });
-
-    installBtn.addEventListener('click', async () => {
-      if (deferredPrompt) {
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        if (outcome === 'accepted') {
-          pwaToast.classList.add('hidden');
-        }
-        deferredPrompt = null;
-      }
-    });
-
-    closeBtn.addEventListener('click', () => {
-      pwaToast.classList.add('hidden');
-    });
   </script>
 </body>
 </html>
