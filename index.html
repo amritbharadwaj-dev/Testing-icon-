@@ -8,6 +8,21 @@
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; }
+    
+    /* Loading spinner animation */
+    .loader {
+      border: 3px solid #f3f3f3;
+      border-radius: 50%;
+      border-top: 3px solid #4f46e5;
+      width: 24px;
+      height: 24px;
+      -webkit-animation: spin 1s linear infinite; /* Safari */
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-center p-4">
@@ -22,7 +37,7 @@
         </svg>
       </div>
       <h1 class="text-3xl font-extrabold text-slate-900 tracking-tight">QR Studio</h1>
-      <p class="text-slate-500 font-medium mt-2">Create Real High-Res PNG QR Codes</p>
+      <p class="text-slate-500 font-medium mt-2">100% Reliable Cloud QR Generator</p>
     </div>
 
     <!-- Input Box -->
@@ -35,9 +50,16 @@
     <div class="flex flex-col items-center gap-6">
       
       <!-- The Real PNG Image Container -->
-      <div class="bg-white p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100 flex items-center justify-center w-full max-w-[280px] aspect-square">
-        <!-- We use a REAL <img> tag here so it's a true PNG in the DOM -->
-        <img id="qr-image" src="" alt="QR Code" class="w-full h-full object-contain hidden rounded-xl transition-all duration-300">
+      <div class="bg-white p-4 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.06)] border border-slate-100 flex flex-col items-center justify-center w-full max-w-[280px] aspect-square relative">
+        
+        <!-- Loading State -->
+        <div id="loading" class="absolute inset-0 flex flex-col items-center justify-center bg-white/90 z-10 rounded-3xl hidden">
+          <div class="loader mb-2"></div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Generating...</p>
+        </div>
+
+        <!-- We use a REAL server-generated <img> tag here so it never fails on mobile -->
+        <img id="qr-image" src="https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=https://example.com&margin=10" alt="QR Code" class="w-full h-full object-contain rounded-xl transition-all duration-300" crossorigin="anonymous">
       </div>
       
       <p class="text-sm text-slate-400 font-medium text-center">💡 <span class="text-slate-500">Mobile tip:</span> You can also long-press the image above to save it directly to your phone's gallery.</p>
@@ -53,56 +75,65 @@
     </div>
   </div>
 
-  <!-- Use the highly stable simple qrcode package -->
-  <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.3/build/qrcode.min.js"></script>
   <script>
     const input = document.getElementById('qr-input');
     const img = document.getElementById('qr-image');
     const downloadBtn = document.getElementById('download-btn');
+    const loading = document.getElementById('loading');
 
-    function generate() {
+    let typingTimer;
+
+    function updateQR() {
       const text = input.value || "https://example.com";
+      // URL encode the text so the API can read it properly
+      const encodedText = encodeURIComponent(text);
       
-      // Generate real high-res PNG Data URL (Base64)
-      QRCode.toDataURL(text, {
-        width: 1080, // Ultra High resolution 1080x1080
-        margin: 2,
-        color: {
-          dark: '#0f172a', // Clean Slate 900 color for a professional look
-          light: '#ffffff'
-        }
-      }, function (err, url) {
-        if (err) {
-          console.error(err);
-          return;
-        }
-        
-        // This is a REAL image element, injecting a real PNG source
-        img.src = url;
-        img.classList.remove('hidden');
-      });
+      // Use the extremely reliable Cloud API which works 100% of the time on all devices
+      const apiUrl = `https://api.qrserver.com/v1/create-qr-code/?size=1000x1000&data=${encodedText}&margin=10`;
+      
+      loading.classList.remove('hidden');
+      
+      // Update image source
+      img.src = apiUrl;
     }
 
-    // Update real-time as user types
+    // Hide loader when image successfully loads from the cloud
+    img.onload = () => {
+      loading.classList.add('hidden');
+    };
+
+    // Debounce typing so we don't spam the API server on every single letter
     input.addEventListener('input', () => {
-      generate();
+      clearTimeout(typingTimer);
+      typingTimer = setTimeout(updateQR, 500); // Wait 0.5s after user stops typing
     });
 
     // Foolproof Download action
-    downloadBtn.addEventListener('click', () => {
-      if(!img.src) return;
-      
-      const link = document.createElement('a');
-      link.download = 'Professional_QR_Code.png';
-      link.href = img.src;
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
+    downloadBtn.addEventListener('click', async () => {
+      try {
+        const response = await fetch(img.src);
+        const blob = await response.blob();
+        const blobUrl = URL.createObjectURL(blob);
+        
+        const link = document.createElement('a');
+        link.download = 'Professional_QR_Code.png';
+        link.href = blobUrl;
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(blobUrl);
+      } catch (err) {
+        // Fallback for strict browsers
+        const link = document.createElement('a');
+        link.download = 'Professional_QR_Code.png';
+        link.href = img.src;
+        link.target = "_blank";
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
     });
-
-    // Generate initial code on page load
-    generate();
   </script>
 </body>
 </html>
